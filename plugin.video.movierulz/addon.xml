@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon id="plugin.video.movierulz"
+       name="MovieRulz"
+       version="1.0.0"
+       provider-name="MovieRulz">
+  <requires>
+    <!-- Only xbmc.python is required — all parsing uses Python stdlib (zero external deps) -->
+    <import addon="xbmc.python" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">Browse and stream movies from MovieRulz via magnet/torrent links</summary>
+    <description lang="en_GB">
+      Browse Bollywood, Telugu, Tamil, Malayalam, Hollywood and more.
+      Extracts magnet torrent links from MovieRulz and opens them in Kodi
+      via your installed BitTorrent addon (e.g. Elementum or Quasar).
+      Zero external dependencies — uses Python built-ins only.
+    </description>
+    <disclaimer lang="en_GB">For personal use only. Respect copyright laws in your country.</disclaimer>
+    <platform>all</platform>
+    <license>GPL v2</license>
+    <forum/>
+    <website>https://www.5movierulz.discount/</website>
+    <source/>
+    <email/>
+  </extension>
+</addon>

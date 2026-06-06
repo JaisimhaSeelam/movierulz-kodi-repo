@@ -1,0 +1,9 @@
+# Exclude the plain (un-versioned) zip — Kodi repo needs only the versioned one
+plugin.video.movierulz.zip
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
