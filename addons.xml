@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addons>
 
+  <!-- ═══ MovieRulz Repository Addon ════════════════════════════════════════ -->
+  <addon id="repository.movierulz"
+         name="MovieRulz Repository"
+         version="1.0.0"
+         provider-name="JaisimhaSeelam">
+    <requires>
+      <import addon="xbmc.addon" version="12.0.0"/>
+    </requires>
+    <extension point="xbmc.addon.repository" name="MovieRulz Repository">
+      <info compressed="false">https://raw.githubusercontent.com/JaisimhaSeelam/movierulz-kodi-repo/main/addons.xml</info>
+      <checksum>https://raw.githubusercontent.com/JaisimhaSeelam/movierulz-kodi-repo/main/addons.xml.md5</checksum>
+      <datadir zip="true">https://raw.githubusercontent.com/JaisimhaSeelam/movierulz-kodi-repo/main/</datadir>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+      <summary lang="en_GB">MovieRulz Kodi Repository</summary>
+      <description lang="en_GB">Repository containing the MovieRulz video addon.</description>
+      <platform>all</platform>
+      <license>GPL v2</license>
+    </extension>
+  </addon>
+
+  <!-- ═══ MovieRulz Video Plugin ════════════════════════════════════════════ -->
   <addon id="plugin.video.movierulz"
          name="MovieRulz"
          version="1.0.0"
@@ -15,14 +37,12 @@
       <summary lang="en_GB">Browse and stream movies from MovieRulz via magnet/torrent links</summary>
       <description lang="en_GB">
         Browse Bollywood, Telugu, Tamil, Malayalam, Hollywood and more.
-        Extracts magnet torrent links from MovieRulz and opens them in Kodi
-        via your installed BitTorrent addon (e.g. Elementum or Quasar).
+        Extracts magnet torrent links and opens them via Elementum/Quasar.
         Zero external dependencies — uses Python built-ins only.
       </description>
       <disclaimer lang="en_GB">For personal use only. Respect copyright laws in your country.</disclaimer>
       <platform>all</platform>
       <license>GPL v2</license>
-      <website>https://www.5movierulz.discount/</website>
     </extension>
   </addon>
 
