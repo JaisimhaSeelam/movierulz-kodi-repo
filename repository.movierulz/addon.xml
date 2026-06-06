@@ -1,16 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="repository.movierulz"
        name="MovieRulz Repository"
        version="1.0.0"
        provider-name="JaisimhaSeelam">
-  <requires>
-    <import addon="xbmc.addon" version="12.0.0"/>
-  </requires>
   <extension point="xbmc.addon.repository"
              name="MovieRulz Repository">
-    <info compressed="false">https://raw.githubusercontent.com/JaisimhaSeelam/movierulz-kodi-repo/main/addons.xml</info>
-    <checksum>https://raw.githubusercontent.com/JaisimhaSeelam/movierulz-kodi-repo/main/addons.xml.md5</checksum>
-    <datadir zip="true">https://raw.githubusercontent.com/JaisimhaSeelam/movierulz-kodi-repo/main/</datadir>
+    <dir>
+      <info compressed="false">https://raw.githubusercontent.com/JaisimhaSeelam/movierulz-kodi-repo/main/addons.xml</info>
+      <checksum>https://raw.githubusercontent.com/JaisimhaSeelam/movierulz-kodi-repo/main/addons.xml.md5</checksum>
+      <datadir zip="true">https://raw.githubusercontent.com/JaisimhaSeelam/movierulz-kodi-repo/main/</datadir>
+    </dir>
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary lang="en_GB">MovieRulz Kodi Repository</summary>
@@ -20,3 +19,4 @@
     <website>https://github.com/JaisimhaSeelam/movierulz-kodi-repo</website>
   </extension>
 </addon>
+
