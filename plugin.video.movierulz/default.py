@@ -11,6 +11,7 @@ Zero external dependencies.  Uses only Python stdlib:
 import sys
 import re
 import os
+import ssl
 
 try:
     from urllib.parse import urlencode, parse_qsl, quote_plus, unquote_plus
@@ -35,7 +36,10 @@ import xbmcaddon
 _ADDON    = xbmcaddon.Addon()
 _URL      = sys.argv[0]
 _HANDLE   = int(sys.argv[1])
-_BASE_URL = 'https://www.5movierulz.discount'
+_BASE_URL = _ADDON.getSetting('base_url')
+if not _BASE_URL:
+    _BASE_URL = 'https://www.5movierulz.discount'
+
 
 _HEADERS = [
     ('User-Agent',
@@ -220,13 +224,28 @@ def minisoup(html):
 
 def fetch(url):
     xbmc.log('[MovieRulz] Fetching: %s' % url, xbmc.LOGDEBUG)
+    
+    # Create unverified context to bypass certificate errors
+    context = None
+    try:
+        context = ssl._create_unverified_context()
+    except Exception:
+        pass
+
     try:
         req = Request(url)
         for k, v in _HEADERS:
             req.add_header(k, v)
-        with urlopen(req, timeout=20) as resp:
+        
+        if context:
+            resp = urlopen(req, context=context, timeout=20)
+        else:
+            resp = urlopen(req, timeout=20)
+            
+        with resp:
             raw = resp.read()
-        # detect charset from Content-Type or default to utf-8
+            
+        # detect charset
         ct = ''
         try:
             ct = resp.headers.get('Content-Type', '')
@@ -235,8 +254,32 @@ def fetch(url):
         m = re.search(r'charset=([^\s;]+)', ct, re.I)
         charset = m.group(1) if m else 'utf-8'
         return raw.decode(charset, errors='replace')
+        
     except Exception as exc:
-        xbmc.log('[MovieRulz] Fetch error: %s — %s' % (url, exc), xbmc.LOGERROR)
+        xbmc.log('[MovieRulz] Fetch error for %s: %s' % (url, exc), xbmc.LOGERROR)
+        
+        # If HTTPS failed, try falling back to HTTP
+        if url.startswith('https://'):
+            fallback_url = url.replace('https://', 'http://', 1)
+            xbmc.log('[MovieRulz] Retrying with HTTP fallback: %s' % fallback_url, xbmc.LOGINFO)
+            try:
+                req = Request(fallback_url)
+                for k, v in _HEADERS:
+                    req.add_header(k, v)
+                resp = urlopen(req, timeout=20)
+                with resp:
+                    raw = resp.read()
+                ct = ''
+                try:
+                    ct = resp.headers.get('Content-Type', '')
+                except Exception:
+                    pass
+                m = re.search(r'charset=([^\s;]+)', ct, re.I)
+                charset = m.group(1) if m else 'utf-8'
+                return raw.decode(charset, errors='replace')
+            except Exception as fb_exc:
+                xbmc.log('[MovieRulz] HTTP fallback also failed: %s' % fb_exc, xbmc.LOGERROR)
+
         xbmcgui.Dialog().notification(
             'MovieRulz',
             'Network error — check internet / VPN.',

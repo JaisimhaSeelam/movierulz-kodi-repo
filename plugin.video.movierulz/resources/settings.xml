@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings version="1">
+    <section id="plugin.video.movierulz">
+        <category label="General">
+            <group id="1">
+                <setting id="base_url" type="string" label="MovieRulz Domain" default="https://www.5movierulz.discount"/>
+            </group>
+        </category>
+    </section>
+</settings>
