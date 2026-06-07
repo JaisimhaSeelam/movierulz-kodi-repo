@@ -29,11 +29,11 @@ function Create-KodiZip {
     $dirEntryName = $sourceDirName + "/"
     $dirEntry = $archive.CreateEntry($dirEntryName)
     
-    # Add all files in the directory
-    $files = Get-ChildItem -Path $sourceDirName -File -Recurse
+    # Add all files in the directory directly from original path
+    $sourceFullPath = (Get-Item $sourceDirName).FullName
+    $files = Get-ChildItem -Path $sourceFullPath -File -Recurse -Exclude "*.zip"
     foreach ($file in $files) {
         # Calculate the relative path within the directory
-        $sourceFullPath = (Get-Item $sourceDirName).FullName
         $relativePath = $file.FullName.Substring($sourceFullPath.Length + 1)
         # Normalize path separators to forward slash
         $entryName = $sourceDirName + "/" + $relativePath.Replace("\", "/")
@@ -56,9 +56,13 @@ function Create-KodiZip {
 
 # 2. Package repository
 Create-KodiZip -sourceDirName "repository.movierulz" -zipFileName "repository.movierulz-1.0.0.zip"
+# Copy zip inside the repository folder itself for Kodi repository indexing structure
+Copy-Item -Path "repository.movierulz-1.0.0.zip" -Destination "repository.movierulz/repository.movierulz-1.0.0.zip" -Force
 
 # 3. Package plugin
 Create-KodiZip -sourceDirName "plugin.video.movierulz" -zipFileName "plugin.video.movierulz-1.0.0.zip"
+# Copy zip inside the plugin folder itself for Kodi repository indexing structure
+Copy-Item -Path "plugin.video.movierulz-1.0.0.zip" -Destination "plugin.video.movierulz/plugin.video.movierulz-1.0.0.zip" -Force
 
 # 4. Copy to GitHub Pages directory
 $ghPagesDir = "C:\Users\jaisimha.seelam\OneDrive - ascendion\Documents\jaisimhaseelam.github.io"
