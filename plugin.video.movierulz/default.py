@@ -325,10 +325,11 @@ def get_playable_url(magnet):
             resolved = resolveurl.resolve(magnet)
             if resolved and resolved != magnet:
                 xbmc.log('[MovieRulz] Resolved magnet via ResolveURL to: %s' % resolved, xbmc.LOGINFO)
-                return resolved
+                return resolved, ""
         except Exception as e:
             xbmc.log('[MovieRulz] ResolveURL resolution failed: %s' % e, xbmc.LOGERROR)
-    return magnet
+            return magnet, str(e)
+    return magnet, ""
 
 
 def play_torrent(magnet):
@@ -341,14 +342,23 @@ def play_torrent(magnet):
         xbmcplugin.setResolvedUrl(_HANDLE, True, li)
         return
 
-    playable_url = get_playable_url(magnet)
+    playable_url, err_msg = get_playable_url(magnet)
     if playable_url == magnet:
         xbmc.log('[MovieRulz] ResolveURL resolution failed. Showing warning dialog.', xbmc.LOGWARNING)
-        xbmcgui.Dialog().ok(
-            'MovieRulz',
-            'ResolveURL failed to resolve this torrent.\n'
-            'Please check that you have authorized your Debrid account (Real-Debrid, Premiumize, etc.) in ResolveURL settings.'
-        )
+        if "451" in err_msg or "infringing" in err_msg.lower():
+            xbmcgui.Dialog().ok(
+                'MovieRulz',
+                'Real-Debrid has blocked this torrent link.\n'
+                'Reason: Error 451 (Infringing/DMCA file).\n'
+                'Please try playing a different torrent link or quality.'
+            )
+        else:
+            dialog_text = 'ResolveURL failed to resolve this torrent.'
+            if err_msg:
+                dialog_text += '\nError: %s' % err_msg
+            else:
+                dialog_text += '\nPlease check that you have authorized your Debrid account (Real-Debrid, Premiumize, etc.) in ResolveURL settings.'
+            xbmcgui.Dialog().ok('MovieRulz', dialog_text)
         xbmcplugin.setResolvedUrl(_HANDLE, False, xbmcgui.ListItem())
     else:
         xbmc.log('[MovieRulz] Resolving torrent playback to: %s' % playable_url, xbmc.LOGINFO)
