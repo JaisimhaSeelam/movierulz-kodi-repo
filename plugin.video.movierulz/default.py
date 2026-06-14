@@ -141,10 +141,19 @@ class _Node(object):
 
 def _split_selector(selector):
     """Split 'div.foo > span.bar a' into ['div.foo', '>', 'span.bar', ' ', 'a']."""
+    s = re.sub(r'\s+', ' ', selector.strip())
+    s = re.sub(r'\s*>\s*', ' > ', s)
+    raw_tokens = s.split(' ')
     tokens = []
-    for part in re.split(r'\s*(>)\s*|\s+', selector):
-        if part:
-            tokens.append(part)
+    for t in raw_tokens:
+        if t == '>':
+            tokens.append('>')
+        elif t == '':
+            continue
+        else:
+            if tokens and tokens[-1] != '>' and tokens[-1] != ' ':
+                tokens.append(' ')
+            tokens.append(t)
     return tokens
 
 
@@ -418,13 +427,20 @@ def show_movie_list(page_url):
         a_tag   = card.select_one('div.cont_display a')
         img_tag = card.select_one('div.cont_display img')
         p_tag   = card.select_one('p b') or card.select_one('p')
+        xbmc.log('[MovieRulz] Card tags found - a_tag: %s, img_tag: %s, p_tag: %s' % (
+            a_tag.tag if a_tag else 'None',
+            img_tag.tag if img_tag else 'None',
+            p_tag.tag if p_tag else 'None'
+        ), xbmc.LOGDEBUG)
         if not a_tag:
+            xbmc.log('[MovieRulz] Skipping card: a_tag is None', xbmc.LOGDEBUG)
             continue
 
         title = (a_tag.get('title') or
                  (p_tag.get_text(strip=True) if p_tag else '')).strip()
         href  = a_tag.get('href', '').strip()
         thumb = (img_tag.get('src', '') if img_tag else '').strip()
+        xbmc.log('[MovieRulz] Parsed Movie - Title: "%s" | URL: %s' % (title, href), xbmc.LOGINFO)
         if not href:
             continue
         if not href.startswith('http'):
