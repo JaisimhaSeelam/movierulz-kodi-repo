@@ -315,6 +315,64 @@ def plugin_url(**kwargs):
     return '%s?%s' % (_URL, urlencode(kwargs))
 
 
+def get_playable_url(magnet):
+    player = _ADDON.getSetting('torrent_player') or 'Auto-detect'
+    xbmc.log('[MovieRulz] Resolving magnet via torrent_player setting: %s' % player, xbmc.LOGDEBUG)
+    
+    if player == 'Auto-detect':
+        # Try Elementum
+        try:
+            xbmcaddon.Addon('plugin.video.elementum')
+            xbmc.log('[MovieRulz] Auto-detected Elementum player.', xbmc.LOGINFO)
+            return 'plugin://plugin.video.elementum/play?uri=%s' % quote_plus(magnet)
+        except Exception:
+            pass
+
+        # Try Torrest
+        try:
+            xbmcaddon.Addon('plugin.video.torrest')
+            xbmc.log('[MovieRulz] Auto-detected Torrest player.', xbmc.LOGINFO)
+            return 'plugin://plugin.video.torrest/play?uri=%s' % quote_plus(magnet)
+        except Exception:
+            pass
+
+        # Try Quasar
+        try:
+            xbmcaddon.Addon('plugin.video.quasar')
+            xbmc.log('[MovieRulz] Auto-detected Quasar player.', xbmc.LOGINFO)
+            return 'plugin://plugin.video.quasar/play?uri=%s' % quote_plus(magnet)
+        except Exception:
+            pass
+            
+        return magnet
+
+    elif player == 'Elementum':
+        return 'plugin://plugin.video.elementum/play?uri=%s' % quote_plus(magnet)
+    elif player == 'Torrest':
+        return 'plugin://plugin.video.torrest/play?uri=%s' % quote_plus(magnet)
+    elif player == 'Quasar':
+        return 'plugin://plugin.video.quasar/play?uri=%s' % quote_plus(magnet)
+    else:
+        return magnet
+
+
+def play_torrent(magnet):
+    xbmc.log('[MovieRulz] play_torrent called for magnet link', xbmc.LOGINFO)
+    playable_url = get_playable_url(magnet)
+    if playable_url == magnet:
+        xbmc.log('[MovieRulz] No torrent player found. Showing warning dialog.', xbmc.LOGWARNING)
+        xbmcgui.Dialog().ok(
+            'MovieRulz',
+            'No BitTorrent player detected.\n'
+            'Please install Elementum or Torrest to stream torrent magnet links.'
+        )
+        xbmcplugin.setResolvedUrl(_HANDLE, False, xbmcgui.ListItem())
+    else:
+        xbmc.log('[MovieRulz] Resolving torrent playback to: %s' % playable_url, xbmc.LOGINFO)
+        li = xbmcgui.ListItem(path=playable_url)
+        xbmcplugin.setResolvedUrl(_HANDLE, True, li)
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  MENU DEFINITIONS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -558,9 +616,10 @@ def show_movie(movie_url, title, thumb):
             'genre':     genre,
             'mediatype': 'movie',
         })
-        # IsPlayable=true → Kodi passes the magnet: URI to Elementum / system handler
+        # IsPlayable=true → Kodi calls our addon's play_torrent action to resolve
         li.setProperty('IsPlayable', 'true')
-        xbmcplugin.addDirectoryItem(_HANDLE, magnet, li, isFolder=False)
+        url = plugin_url(action='play_torrent', extra=magnet)
+        xbmcplugin.addDirectoryItem(_HANDLE, url, li, isFolder=False)
 
     xbmcplugin.endOfDirectory(_HANDLE)
 
@@ -595,6 +654,8 @@ def router(paramstring):
         show_movie_list(extra)
     elif action == 'show_movie':
         show_movie(extra, title, thumb)
+    elif action == 'play_torrent':
+        play_torrent(extra)
     elif action == 'search':
         do_search()
     else:
