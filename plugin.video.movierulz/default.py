@@ -392,7 +392,7 @@ def play_torrent(magnet):
         else:
             xbmcgui.Dialog().ok(
                 'MovieRulz',
-                'No BitTorrent player detected.\n'
+                'No BitTorrent player detected (v1.0.5).\n'
                 'Please install Elementum or Torrest to stream torrent magnet links.'
             )
         xbmcplugin.setResolvedUrl(_HANDLE, False, xbmcgui.ListItem())
