@@ -320,6 +320,16 @@ def get_playable_url(magnet):
     xbmc.log('[MovieRulz] Resolving magnet via torrent_player setting: %s' % player, xbmc.LOGDEBUG)
     
     if player == 'Auto-detect':
+        # Try ResolveURL first if installed and authorized
+        try:
+            import resolveurl
+            resolved = resolveurl.resolve(magnet)
+            if resolved and resolved != magnet:
+                xbmc.log('[MovieRulz] Auto-detected and resolved magnet via ResolveURL to: %s' % resolved, xbmc.LOGINFO)
+                return resolved
+        except Exception as e:
+            xbmc.log('[MovieRulz] ResolveURL auto-detection check skipped or failed: %s' % e, xbmc.LOGDEBUG)
+
         # Try Elementum
         try:
             xbmcaddon.Addon('plugin.video.elementum')
@@ -346,6 +356,17 @@ def get_playable_url(magnet):
             
         return magnet
 
+    elif player == 'ResolveURL':
+        try:
+            import resolveurl
+            resolved = resolveurl.resolve(magnet)
+            if resolved:
+                xbmc.log('[MovieRulz] Explicitly resolved magnet via ResolveURL to: %s' % resolved, xbmc.LOGINFO)
+                return resolved
+        except Exception as e:
+            xbmc.log('[MovieRulz] ResolveURL resolution failed: %s' % e, xbmc.LOGERROR)
+        return magnet
+
     elif player == 'Elementum':
         return 'plugin://plugin.video.elementum/play?uri=%s' % quote_plus(magnet)
     elif player == 'Torrest':
@@ -360,12 +381,20 @@ def play_torrent(magnet):
     xbmc.log('[MovieRulz] play_torrent called for magnet link', xbmc.LOGINFO)
     playable_url = get_playable_url(magnet)
     if playable_url == magnet:
-        xbmc.log('[MovieRulz] No torrent player found. Showing warning dialog.', xbmc.LOGWARNING)
-        xbmcgui.Dialog().ok(
-            'MovieRulz',
-            'No BitTorrent player detected.\n'
-            'Please install Elementum or Torrest to stream torrent magnet links.'
-        )
+        xbmc.log('[MovieRulz] No torrent player found or resolution failed. Showing warning dialog.', xbmc.LOGWARNING)
+        player = _ADDON.getSetting('torrent_player') or 'Auto-detect'
+        if player == 'ResolveURL':
+            xbmcgui.Dialog().ok(
+                'MovieRulz',
+                'ResolveURL failed to resolve this torrent.\n'
+                'Please check that you have authorized your Debrid account (Real-Debrid, Premiumize, etc.) in ResolveURL settings.'
+            )
+        else:
+            xbmcgui.Dialog().ok(
+                'MovieRulz',
+                'No BitTorrent player detected.\n'
+                'Please install Elementum or Torrest to stream torrent magnet links.'
+            )
         xbmcplugin.setResolvedUrl(_HANDLE, False, xbmcgui.ListItem())
     else:
         xbmc.log('[MovieRulz] Resolving torrent playback to: %s' % playable_url, xbmc.LOGINFO)

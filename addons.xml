@@ -25,10 +25,11 @@
   <!-- ═══ MovieRulz Video Plugin ════════════════════════════════════════════ -->
   <addon id="plugin.video.movierulz"
          name="MovieRulz"
-         version="1.0.3"
+         version="1.0.4"
          provider-name="MovieRulz">
     <requires>
       <import addon="xbmc.python" version="3.0.0"/>
+      <import addon="script.module.resolveurl" optional="true"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="default.py">
       <provides>video</provides>
