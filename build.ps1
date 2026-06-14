@@ -54,22 +54,33 @@ function Create-KodiZip {
     Write-Host "Created $zipFileName successfully."
 }
 
+# Load versions dynamically from addon.xml files
+[xml]$repoXml = Get-Content "repository.movierulz/addon.xml"
+$repoVersion = $repoXml.addon.version
+[xml]$pluginXml = Get-Content "plugin.video.movierulz/addon.xml"
+$pluginVersion = $pluginXml.addon.version
+
+Write-Host "Detected Repository Version: $repoVersion"
+Write-Host "Detected Plugin Version: $pluginVersion"
+
 # 2. Package repository
-Create-KodiZip -sourceDirName "repository.movierulz" -zipFileName "repository.movierulz-1.0.0.zip"
+$repoZip = "repository.movierulz-$repoVersion.zip"
+Create-KodiZip -sourceDirName "repository.movierulz" -zipFileName $repoZip
 # Copy zip inside the repository folder itself for Kodi repository indexing structure
-Copy-Item -Path "repository.movierulz-1.0.0.zip" -Destination "repository.movierulz/repository.movierulz-1.0.0.zip" -Force
+Copy-Item -Path $repoZip -Destination "repository.movierulz/$repoZip" -Force
 
 # 3. Package plugin
-Create-KodiZip -sourceDirName "plugin.video.movierulz" -zipFileName "plugin.video.movierulz-1.0.0.zip"
+$pluginZip = "plugin.video.movierulz-$pluginVersion.zip"
+Create-KodiZip -sourceDirName "plugin.video.movierulz" -zipFileName $pluginZip
 # Copy zip inside the plugin folder itself for Kodi repository indexing structure
-Copy-Item -Path "plugin.video.movierulz-1.0.0.zip" -Destination "plugin.video.movierulz/plugin.video.movierulz-1.0.0.zip" -Force
+Copy-Item -Path $pluginZip -Destination "plugin.video.movierulz/$pluginZip" -Force
 
 # 4. Copy to GitHub Pages directory
 $ghPagesDir = "C:\Users\jaisimha.seelam\OneDrive - ascendion\Documents\jaisimhaseelam.github.io"
 if (Test-Path $ghPagesDir) {
-    Copy-Item -Path "repository.movierulz-1.0.0.zip" -Destination (Join-Path $ghPagesDir "repository.movierulz-1.0.0.zip") -Force
-    Copy-Item -Path "plugin.video.movierulz-1.0.0.zip" -Destination (Join-Path $ghPagesDir "plugin.video.movierulz-1.0.0.zip") -Force
-    Write-Host "Copied zip files to GitHub Pages directory."
+    Copy-Item -Path $repoZip -Destination (Join-Path $ghPagesDir $repoZip) -Force
+    Copy-Item -Path $pluginZip -Destination (Join-Path $ghPagesDir $pluginZip) -Force
+    Write-Host "Copied zip files ($repoZip, $pluginZip) to GitHub Pages directory."
 } else {
     Write-Warning "GitHub Pages directory not found at $ghPagesDir"
 }

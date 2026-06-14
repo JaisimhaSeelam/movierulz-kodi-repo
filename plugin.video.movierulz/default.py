@@ -37,8 +37,14 @@ _ADDON    = xbmcaddon.Addon()
 _URL      = sys.argv[0]
 _HANDLE   = int(sys.argv[1])
 _BASE_URL = _ADDON.getSetting('base_url')
-if not _BASE_URL:
-    _BASE_URL = 'https://www.5movierulz.discount'
+
+# Auto-migrate from the legacy broken domain to the new working one
+if not _BASE_URL or '5movierulz.discount' in _BASE_URL:
+    _BASE_URL = 'https://www.5movierulz.school'
+    try:
+        _ADDON.setSetting('base_url', _BASE_URL)
+    except Exception:
+        pass
 
 
 _HEADERS = [
@@ -213,8 +219,10 @@ class _SaxParser(HTMLParser):
 
 def minisoup(html):
     """Parse *html* string and return the root _Node."""
+    xbmc.log('[MovieRulz] minisoup parsing started for HTML length: %d' % len(html), xbmc.LOGDEBUG)
     p = _SaxParser()
     p.feed(html)
+    xbmc.log('[MovieRulz] minisoup parsing completed.', xbmc.LOGDEBUG)
     return p.root
 
 
@@ -223,14 +231,15 @@ def minisoup(html):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def fetch(url):
-    xbmc.log('[MovieRulz] Fetching: %s' % url, xbmc.LOGDEBUG)
+    xbmc.log('[MovieRulz] Fetching URL: %s' % url, xbmc.LOGINFO)
     
     # Create unverified context to bypass certificate errors
     context = None
     try:
         context = ssl._create_unverified_context()
-    except Exception:
-        pass
+        xbmc.log('[MovieRulz] Created unverified SSL context successfully.', xbmc.LOGDEBUG)
+    except Exception as ssl_exc:
+        xbmc.log('[MovieRulz] Failed to create unverified SSL context: %s' % ssl_exc, xbmc.LOGDEBUG)
 
     try:
         req = Request(url)
@@ -244,6 +253,8 @@ def fetch(url):
             
         with resp:
             raw = resp.read()
+            
+        xbmc.log('[MovieRulz] Successfully fetched %d bytes from %s' % (len(raw), url), xbmc.LOGINFO)
             
         # detect charset
         ct = ''
@@ -269,6 +280,7 @@ def fetch(url):
                 resp = urlopen(req, timeout=20)
                 with resp:
                     raw = resp.read()
+                xbmc.log('[MovieRulz] HTTP fallback successfully fetched %d bytes' % len(raw), xbmc.LOGINFO)
                 ct = ''
                 try:
                     ct = resp.headers.get('Content-Type', '')
@@ -383,8 +395,10 @@ def show_sub_menu(key):
 
 
 def show_movie_list(page_url):
+    xbmc.log('[MovieRulz] show_movie_list invoked for URL: %s' % page_url, xbmc.LOGINFO)
     html = fetch(page_url)
     if not html:
+        xbmc.log('[MovieRulz] show_movie_list failed: HTML fetch returned empty content', xbmc.LOGERROR)
         xbmcplugin.endOfDirectory(_HANDLE)
         return
 
@@ -393,7 +407,9 @@ def show_movie_list(page_url):
 
     # Each card: div.boxed.film > div.cont_display > a[href] + img[src]
     cards = soup.select('div.boxed.film')
+    xbmc.log('[MovieRulz] show_movie_list parsed HTML. Found %d cards.' % len(cards), xbmc.LOGINFO)
     if not cards:
+        xbmc.log('[MovieRulz] No boxed film cards found in HTML structure.', xbmc.LOGWARNING)
         xbmcgui.Dialog().notification(
             'MovieRulz', 'No movies found on this page.', xbmcgui.NOTIFICATION_INFO, 3000
         )

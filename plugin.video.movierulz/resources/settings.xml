@@ -3,7 +3,7 @@
     <section id="plugin.video.movierulz">
         <category label="General">
             <group id="1">
-                <setting id="base_url" type="string" label="MovieRulz Domain" default="https://www.5movierulz.discount"/>
+                <setting id="base_url" type="string" label="MovieRulz Domain" default="https://www.5movierulz.school"/>
             </group>
         </category>
     </section>

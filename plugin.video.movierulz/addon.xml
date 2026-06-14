@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.movierulz"
        name="MovieRulz"
-       version="1.0.0"
+       version="1.0.1"
        provider-name="MovieRulz">
   <requires>
     <!-- Only xbmc.python is required — all parsing uses Python stdlib (zero external deps) -->
@@ -22,7 +22,7 @@
     <platform>all</platform>
     <license>GPL v2</license>
     <forum/>
-    <website>https://www.5movierulz.discount/</website>
+    <website>https://www.5movierulz.school/</website>
     <source/>
     <email/>
   </extension>
