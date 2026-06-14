@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.movierulz"
        name="MovieRulz"
-       version="1.0.7"
+       version="1.0.8"
        provider-name="MovieRulz">
   <requires>
     <!-- Only xbmc.python is required — all parsing uses Python stdlib (zero external deps) -->
     <import addon="xbmc.python" version="3.0.0"/>
-    <import addon="script.module.resolveurl" optional="true"/>
   </requires>
   <extension point="xbmc.python.pluginsource" library="default.py">
     <provides>video</provides>
@@ -15,8 +14,7 @@
     <summary lang="en_GB">Browse and stream movies from MovieRulz via magnet/torrent links</summary>
     <description lang="en_GB">
       Browse Bollywood, Telugu, Tamil, Malayalam, Hollywood and more.
-      Extracts magnet torrent links from MovieRulz and resolves them in Kodi
-      via ResolveURL.
+      Extracts magnet torrent links from MovieRulz and opens them via Elementum/Torrest/Quasar.
       Zero external dependencies — uses Python built-ins only.
     </description>
     <disclaimer lang="en_GB">For personal use only. Respect copyright laws in your country.</disclaimer>

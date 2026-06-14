@@ -4,7 +4,7 @@
         <category label="General">
             <group id="1">
                 <setting id="base_url" type="string" label="MovieRulz Domain" default="https://www.5movierulz.school"/>
-                <setting id="torrent_player" type="select" label="Torrent Player" values="ResolveURL|Raw Magnet" default="ResolveURL"/>
+                <setting id="torrent_player" type="select" label="Torrent Player" values="Auto-detect|Elementum|Torrest|Quasar|Raw Magnet" default="Auto-detect"/>
             </group>
         </category>
     </section>
